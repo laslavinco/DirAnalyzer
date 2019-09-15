@@ -37,7 +37,7 @@ public:
 				dirpath = p.path().string();
 			}
 			catch (std::exception e) {
-				std::cout << "[! WARNING: ]" << std::endl;
+				std::cout << "[! WARNING: ]" << std::endl << e.what() << " " << std::endl;
 			}
 			if (dirpath.length() > 0)
 				if (fs::is_regular_file(dirpath))
@@ -121,69 +121,59 @@ int main(int argc, char **argv)
 
 	
 
-	if (argc < 2)
+	if (argc < 3)
 	{
 		DisplayError();
 		return 1;
 	}
-	if (argv[1] == arguments[0] || argv[1] == arguments[arguments.size()-1])
-	{
 
-		DisplayHelp();
-		return 0;
-	}
-	
-
-
-	//char* dir_path = argv[2];
-	char* dir_path;
+	char* dir_path = nullptr;
 	unsigned int number_of_files_to_show = 0;
 	char * extension_filter = nullptr;
 	char* output_path = nullptr;
 
-	if (argv[1] != "-p")
+
+	for (int i = 0; i < argc; i++)
 	{
-		char* dir_path = argv[1];
+
+		if (argv[i] == std::string("-h") || argv[i] == std::string("--help"))
+		{
+			DisplayHelp();
+			return 0;
+		}
+
+		if (argv[i] == std::string("-p") || argv[i] == std::string("--path"))
+		{
+			dir_path = argv[i+1];
+		}
+
+		if (argv[i] == std::string("-c") || argv[i] == std::string("--count"))
+		{
+			number_of_files_to_show = std::stoi(argv[i+1]);
+		}
+
+		if (argv[i] == std::string("-e") || argv[i] == std::string("--ext"))
+		{
+			extension_filter = argv[i+1];
+		}
+
+		if (argv[i] == std::string("-o") || argv[i] == std::string("--output"))
+		{
+			output_path = argv[i+1];
+		}
+	}
+
+	if (dir_path != nullptr)
+	{
+		Analyse a(dir_path, number_of_files_to_show, extension_filter);
+		a.ScanDir(a.dir_path);
 	}
 	else
-		char* dir_path = argv[2];
-
-
-	if (argc > 4)
 	{
-		if (argv[3] == arguments[3] || argv[3] == arguments[4])
-			number_of_files_to_show = std::stoi(argv[4]);
-		else
-		{
-			std::cout << "Invalid argument number 2 " << argv[3] << " " << argv[4] << std::endl;
-			return 1;
-		}
-	}
-
-	if (argc > 5)
-	{
-		if (argv[5] == arguments[5] || argv[5] == arguments[6])
-			extension_filter = argv[6];
-		else
-		{
-			std::cout << "Invalid argument number 3 " << argv[4] << " " << argv[5] << std::endl;
-			return 1;
-		}
-	}
-
-	if (argc > 7)
-	{
-		if (argv[7] == arguments[7] || argv[6] == arguments[8])
-			output_path = argv[7];
-		else
-		{
-			std::cout << "Invalid argument number 4 " << argv[6] << " " << argv[7] << std::endl;
-			return 1;
-		}
+		DisplayError();
+		return 1;
 	}
 	
-	Analyse a(dir_path, number_of_files_to_show, extension_filter);
-	a.ScanDir(a.dir_path);
 	system("pause");
 	return 0;
 }
